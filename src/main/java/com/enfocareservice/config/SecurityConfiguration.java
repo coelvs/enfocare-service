@@ -36,20 +36,16 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
-				.authorizeHttpRequests(auth -> auth
-						// ✅ Allow Public Access To Spring Boot Admin Panel
-						.requestMatchers("/admin/**").permitAll()
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable().authorizeHttpRequests()
+				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll()
+				.requestMatchers("/enfocare/medical-file/**").permitAll()
 
-						// ✅ Allow Public Access For Websocket/Chat
-						.requestMatchers("/enfocare/chat/ws/**").permitAll()
+				// ✅ ALLOW Spring Boot Admin Panel Without JWT
+				.requestMatchers("/admin/**").permitAll().requestMatchers("/actuator/**").permitAll()
 
-						// ✅ Allow Access To Medical Files
-						.requestMatchers("/enfocare/medical-file/**").permitAll()
-
-						// ✅ Protect All Other Endpoints (with JWT)
-						.anyRequest().authenticated())
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Move this inside ✅
+				// ✅ Everything else requires JWT Authentication
+				.anyRequest().authenticated().and().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Move this inside ✅
 				.and().authenticationProvider(authenticationProvider)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout.logoutUrl("/api/v1/auth/logout").addLogoutHandler(logoutHandler)
