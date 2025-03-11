@@ -60,6 +60,26 @@
         <scope>provided</scope>
     </dependency>
     
+    <!-- For Spring Boot Admin -->
+    <dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-starter-server</artifactId>
+    <version>3.2.0</version>
+</dependency>
+
+<dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-starter-client</artifactId>
+    <version>3.2.0</version>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<!-- ************************** -->
+
     
   <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
 <dependency>
