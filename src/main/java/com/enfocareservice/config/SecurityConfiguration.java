@@ -37,15 +37,9 @@ public class SecurityConfiguration {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable().authorizeHttpRequests()
-				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll()
-				.requestMatchers("/enfocare/medical-file/**").permitAll()
-
-				// ✅ ALLOW Spring Boot Admin Panel Without JWT
-				.requestMatchers("/admin/**").permitAll().requestMatchers("/actuator/**").permitAll()
-
-				// ✅ Everything else requires JWT Authentication
-				.anyRequest().authenticated().and().sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Move this inside ✅
+				.requestMatchers("/admin/**", "/actuator/**").permitAll()
+				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest().authenticated()
+				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Move this inside ✅
 				.and().authenticationProvider(authenticationProvider)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout.logoutUrl("/api/v1/auth/logout").addLogoutHandler(logoutHandler)
