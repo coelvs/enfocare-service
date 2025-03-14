@@ -2,7 +2,6 @@ package com.enfocareservice.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,182 +30,178 @@ import com.enfocareservice.repository.MedicalFileRepository;
 
 @Service
 public class MedicalFileService {
-    
-    private static final Logger logger = LoggerFactory.getLogger(MedicalFileService.class);
 
-    @Autowired
-    private MedicalFileRepository medicalFileRepository;
+	private static final Logger logger = LoggerFactory.getLogger(MedicalFileService.class);
 
-    @Autowired
-    private MedicalFileMapper medicalFileMapper;
+	@Autowired
+	private MedicalFileRepository medicalFileRepository;
 
-    @Value("${medicalfile.dir:/app/data/images}")
-    private String diagnosisDir;
+	@Autowired
+	private MedicalFileMapper medicalFileMapper;
 
-    public List<String> getRecipentEmailsList(String doctorEmail) {
-        return medicalFileRepository.findDistinctPatientEmailsByDoctorEmail(doctorEmail);
-    }
+	@Value("${medicalfile.dir:/app/data/images}")
+	private String diagnosisDir;
 
-    public void protectPdfFile(String paramFile) {
-        File file = new File(paramFile);
-        logger.info("🔒 Encrypting file: {} ELIF", file.getAbsolutePath());
+	public List<String> getRecipentEmailsList(String doctorEmail) {
+		return medicalFileRepository.findDistinctPatientEmailsByDoctorEmail(doctorEmail);
+	}
 
-        try (PDDocument document = Loader.loadPDF(file)) {
-            AccessPermission ap = new AccessPermission();
-            StandardProtectionPolicy spp = new StandardProtectionPolicy("123456", "123456", ap);
-            spp.setEncryptionKeyLength(128);
-            spp.setPermissions(ap);
-            document.protect(spp);
-            document.save(paramFile); // ✅ Save directly to the same file
-            logger.info("✅ Document encrypted successfully ELIF");
-        } catch (IOException e) {
-            logger.error("❌ Error encrypting PDF file: {} ELIF", paramFile, e);
-        }
-    }
+	public void protectPdfFile(String paramFile) {
+		File file = new File(paramFile);
+		logger.info("🔒 Encrypting file: {} ELIF", file.getAbsolutePath());
 
-    public void uploadDiagnosisFile(String patientEmail, String doctorEmail, MultipartFile file, Long consultationId) {
-        try {
-            logger.info("📤 Uploading file for Patient: {} by Doctor: {} ELIF", patientEmail, doctorEmail);
-            
-            if (file == null || file.isEmpty()) {
-                logger.error("❌ No file received! ELIF");
-                return;
-            }
+		try (PDDocument document = Loader.loadPDF(file)) {
+			AccessPermission ap = new AccessPermission();
+			StandardProtectionPolicy spp = new StandardProtectionPolicy("123456", "123456", ap);
+			spp.setEncryptionKeyLength(128);
+			spp.setPermissions(ap);
+			document.protect(spp);
+			document.save(paramFile); // ✅ Save directly to the same file
+			logger.info("✅ Document encrypted successfully ELIF");
+		} catch (IOException e) {
+			logger.error("❌ Error encrypting PDF file: {} ELIF", paramFile, e);
+		}
+	}
 
-            String modifiedEmail = patientEmail.replaceAll("@|\\.", "");
-            String directoryPath = diagnosisDir + File.separator + modifiedEmail;
-            File directory = new File(directoryPath);
-            if (!directory.exists()) {
-                boolean created = directory.mkdirs();
-                logger.info("📂 Created directory: {} (Success: {}) ELIF", directoryPath, created);
-            }
+	public void uploadDiagnosisFile(String patientEmail, String doctorEmail, MultipartFile file, Long consultationId) {
+		try {
+			logger.info("📤 Uploading file for Patient: {} by Doctor: {} ELIF", patientEmail, doctorEmail);
 
-            String originalFilename = file.getOriginalFilename();
-            String filePath = Paths.get(directoryPath, originalFilename).toString();
-            Files.copy(file.getInputStream(), Path.of(filePath), StandardCopyOption.REPLACE_EXISTING);
-            logger.info("✅ File successfully saved to: {} ELIF", filePath);
+			if (file == null || file.isEmpty()) {
+				logger.error("❌ No file received! ELIF");
+				return;
+			}
 
-            // ✅ Verify that file exists before storing metadata
-            File savedFile = new File(filePath);
-            if (!savedFile.exists()) {
-                logger.error("❌ File saving failed, not storing in DB! ELIF");
-                return;
-            }
+			String modifiedEmail = patientEmail.replaceAll("@|\\.", "");
+			String directoryPath = diagnosisDir + File.separator + modifiedEmail;
+			File directory = new File(directoryPath);
+			if (!directory.exists()) {
+				boolean created = directory.mkdirs();
+				logger.info("📂 Created directory: {} (Success: {}) ELIF", directoryPath, created);
+			}
 
-            String password = generatePassword();
-            MedicalFileEntity medicalFileEntity = new MedicalFileEntity();
-            medicalFileEntity.setPatientEmail(patientEmail);
-            medicalFileEntity.setDoctorEmail(doctorEmail);
-            medicalFileEntity.setFilePath(filePath);
-            medicalFileEntity.setPassword(password);
-            medicalFileEntity.setConsultationId(consultationId);
+			String originalFilename = file.getOriginalFilename();
+			String filePath = Paths.get(directoryPath, originalFilename).toString();
+			Files.copy(file.getInputStream(), Path.of(filePath), StandardCopyOption.REPLACE_EXISTING);
+			logger.info("✅ File successfully saved to: {} ELIF", filePath);
 
-            MedicalFileEntity savedEntity = medicalFileRepository.save(medicalFileEntity);
-            logger.info("✅ File metadata saved in database! File ID: {} ELIF", savedEntity.getId());
+			// ✅ Verify that file exists before storing metadata
+			File savedFile = new File(filePath);
+			if (!savedFile.exists()) {
+				logger.error("❌ File saving failed, not storing in DB! ELIF");
+				return;
+			}
 
-        } catch (IOException e) {
-            logger.error("❌ Error uploading file for patient: {} ELIF", patientEmail, e);
-        }
-    }
+			String password = generatePassword();
+			MedicalFileEntity medicalFileEntity = new MedicalFileEntity();
+			medicalFileEntity.setPatientEmail(patientEmail);
+			medicalFileEntity.setDoctorEmail(doctorEmail);
+			medicalFileEntity.setFilePath(filePath);
+			medicalFileEntity.setPassword(password);
+			medicalFileEntity.setConsultationId(consultationId);
 
+			MedicalFileEntity savedEntity = medicalFileRepository.save(medicalFileEntity);
+			logger.info("✅ File metadata saved in database! File ID: {} ELIF", savedEntity.getId());
 
-    private String generatePassword() {
-        return "generatedPassword";
-    }
+		} catch (IOException e) {
+			logger.error("❌ Error uploading file for patient: {} ELIF", patientEmail, e);
+		}
+	}
 
-    public List<String> getFilePathsForPatient(String patientEmail) {
-        return medicalFileRepository.findFilePathsByPatientEmail(patientEmail);
-    }
-    
-    public Optional<MedicalFile> getFileByPatientAndFileName(String patientEmail, String fileName) {
-        return medicalFileRepository.getFileByPatientAndFileName(patientEmail, fileName)
-            .map(medicalFileMapper::map); // ✅ Convert Entity to Model
-    }
+	private String generatePassword() {
+		return "generatedPassword";
+	}
 
-    public Optional<MedicalFile> getFileById(Long fileId) {
-        return medicalFileRepository.getFileById(fileId)
-            .map(medicalFileMapper::map); // ✅ Convert Entity to Model
-    }
+	public List<String> getFilePathsForPatient(String patientEmail) {
+		return medicalFileRepository.findFilePathsByPatientEmail(patientEmail);
+	}
 
-    public Resource loadFileAsResource(Long fileId) throws IOException {
-        try {
-            Optional<MedicalFileEntity> fileEntityOptional = medicalFileRepository.findById(fileId);
-            if (fileEntityOptional.isPresent()) {
-                Path filePath = Paths.get(fileEntityOptional.get().getFilePath()).normalize();
-                Resource resource = new UrlResource(filePath.toUri());
+	public Optional<MedicalFile> getFileByPatientAndFileName(String patientEmail, String fileName) {
+		return medicalFileRepository.getFileByPatientAndFileName(patientEmail, fileName).map(medicalFileMapper::map); // ✅
+																														// Convert
+																														// Entity
+																														// to
+																														// Model
+	}
 
-                // ✅ Check if the file exists and is readable
-                if (resource.exists() && resource.isReadable()) {
-                    logger.info("✅ Successfully loaded file: {} ELIF", filePath);
+	public Optional<MedicalFile> getFileById(Long fileId) {
+		return medicalFileRepository.getFileById(fileId).map(medicalFileMapper::map); // ✅ Convert Entity to Model
+	}
 
-                    // ✅ Now apply encryption after verifying file exists
-                    protectPdfFile(filePath.toString());
+	public Resource loadFileAsResource(Long fileId) throws IOException {
+		try {
+			Optional<MedicalFileEntity> fileEntityOptional = medicalFileRepository.findById(fileId);
+			if (fileEntityOptional.isPresent()) {
+				Path filePath = Paths.get(fileEntityOptional.get().getFilePath()).normalize();
+				Resource resource = new UrlResource(filePath.toUri());
 
-                    return resource;
-                } else {
-                    logger.error("❌ Unable to read file: {} ELIF", filePath);
-                    throw new IOException("File cannot be read: " + fileId);
-                }
-            } else {
-                logger.error("❌ File entity not found for ID: {} ELIF", fileId);
-                throw new IOException("File entity not found: " + fileId);
-            }
-        } catch (Exception e) {
-            logger.error("❌ Error loading file as resource for ID: {} ELIF", fileId, e);
-            throw new IOException("Error loading file: " + fileId, e);
-        }
-    }
+				// ✅ Check if the file exists and is readable
+				if (resource.exists() && resource.isReadable()) {
+					logger.info("✅ Successfully loaded file: {} ELIF", filePath);
 
+					// ✅ Now apply encryption after verifying file exists
+					protectPdfFile(filePath.toString());
 
-    public List<MedicalFile> getFilesByConsultationId(Long consultationId) {
-        logger.info("Fetching files for consultation ID: {} ELIF", consultationId);
-        
-        String baseUrl = "https://enfocare-service-production.up.railway.app/enfocare/medical-file/download/";
-        
-        return medicalFileRepository.findByConsultationId(consultationId).stream()
-                .map(medicalFileEntity -> {
-                    MedicalFile file = medicalFileMapper.map(medicalFileEntity);
-                    
-                    // ✅ Ensure fileUrl is set
-                    file.setFileUrl(baseUrl + file.getId());
-                    
-                    return file;
-                })
-                .collect(Collectors.toList());
-    }
+					return resource;
+				} else {
+					logger.error("❌ Unable to read file: {} ELIF", filePath);
+					throw new IOException("File cannot be read: " + fileId);
+				}
+			} else {
+				logger.error("❌ File entity not found for ID: {} ELIF", fileId);
+				throw new IOException("File entity not found: " + fileId);
+			}
+		} catch (Exception e) {
+			logger.error("❌ Error loading file as resource for ID: {} ELIF", fileId, e);
+			throw new IOException("Error loading file: " + fileId, e);
+		}
+	}
 
-    public List<MedicalFile> getFilesByConsultationAndDoctor(Long consultationId, String doctorEmail) {
-        logger.info("Fetching files for Consultation ID: {} and Doctor: {} ELIF", consultationId, doctorEmail);
+	public List<MedicalFile> getFilesByConsultationId(Long consultationId) {
+		logger.info("Fetching files for consultation ID: {} ELIF", consultationId);
 
-        String baseUrl = "https://enfocare-service-production.up.railway.app/enfocare/medical-file/download/";
+		String baseUrl = "https://enfocare-service-production.up.railway.app/enfocare/medical-file/download/";
 
-        return medicalFileRepository.findByConsultationIdAndDoctorEmail(consultationId, doctorEmail).stream()
-                .map(medicalFileEntity -> {
-                    MedicalFile file = medicalFileMapper.map(medicalFileEntity);
+		return medicalFileRepository.findByConsultationId(consultationId).stream().map(medicalFileEntity -> {
+			MedicalFile file = medicalFileMapper.map(medicalFileEntity);
 
-                    // ✅ Ensure fileUrl is set
-                    file.setFileUrl(baseUrl + file.getId());
+			// ✅ Ensure fileUrl is set
+			file.setFileUrl(baseUrl + file.getId());
 
-                    return file;
-                })
-                .collect(Collectors.toList());
-    }
+			return file;
+		}).collect(Collectors.toList());
+	}
 
-    public List<MedicalFile> getFilesByConsultationAndPatient(Long consultationId, String patientEmail) {
-        logger.info("📄 Fetching files for Consultation ID: {} and Patient: {} ELIF", consultationId, patientEmail);
+	public List<MedicalFile> getFilesByConsultationAndDoctor(Long consultationId, String doctorEmail) {
+		logger.info("Fetching files for Consultation ID: {} and Doctor: {} ELIF", consultationId, doctorEmail);
 
-        String baseUrl = "https://enfocare-service-production.up.railway.app/enfocare/medical-file/download/";
+		String baseUrl = "https://enfocare-service-production.up.railway.app/enfocare/medical-file/download/";
 
-        return medicalFileRepository.findByConsultationIdAndPatientEmail(consultationId, patientEmail).stream()
-                .map(medicalFileEntity -> {
-                    MedicalFile file = medicalFileMapper.map(medicalFileEntity);
+		return medicalFileRepository.findByConsultationIdAndDoctorEmail(consultationId, doctorEmail).stream()
+				.map(medicalFileEntity -> {
+					MedicalFile file = medicalFileMapper.map(medicalFileEntity);
 
-                    // ✅ Ensure fileUrl is set
-                    file.setFileUrl(baseUrl + file.getId());
+					// ✅ Ensure fileUrl is set
+					file.setFileUrl(baseUrl + file.getId());
 
-                    return file;
-                })
-                .collect(Collectors.toList());
-    }
+					return file;
+				}).collect(Collectors.toList());
+	}
+
+	public List<MedicalFile> getFilesByConsultationAndPatient(Long consultationId, String patientEmail) {
+		logger.info("📄 Fetching files for Consultation ID: {} and Patient: {} ELIF", consultationId, patientEmail);
+
+		String baseUrl = "https://enfocare-service-production.up.railway.app/enfocare/medical-file/download/";
+
+		return medicalFileRepository.findByConsultationIdAndPatientEmail(consultationId, patientEmail).stream()
+				.map(medicalFileEntity -> {
+					MedicalFile file = medicalFileMapper.map(medicalFileEntity);
+
+					// ✅ Ensure fileUrl is set
+					file.setFileUrl(baseUrl + file.getId());
+
+					return file;
+				}).collect(Collectors.toList());
+	}
 
 }

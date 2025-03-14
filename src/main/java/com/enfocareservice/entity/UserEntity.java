@@ -23,6 +23,8 @@ import jakarta.persistence.Table;
 @Table(name = "user")
 public class UserEntity implements UserDetails, CredentialsContainer {
 
+	private static final long serialVersionUID = 1L; // ✅ Added serialVersionUID
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
@@ -109,8 +111,7 @@ public class UserEntity implements UserDetails, CredentialsContainer {
 
 	@Override
 	public void eraseCredentials() {
-		// TODO Auto-generated method stub
-
+		this.password = null; // ✅ Clears credentials from memory
 	}
 
 }
