@@ -7,17 +7,20 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import de.codecentric.boot.admin.server.config.EnableAdminServer;
+
 @SpringBootApplication
 @EnableScheduling
 @EnableTransactionManagement
+@EnableAdminServer
 public class EnfocareServiceApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(EnfocareServiceApplication.class);
-	
-    public static void main(String[] args) {
-    	 logger.info("🚀 Starting Enfocare Service Application... TOGE");
-         SpringApplication.run(EnfocareServiceApplication.class, args);
-         logger.info("✅ Enfocare Service Application Started Successfully! TOGE");
-    }
+
+	public static void main(String[] args) {
+		logger.info("🚀 Starting Enfocare Service Application... TOGE");
+		SpringApplication.run(EnfocareServiceApplication.class, args);
+		logger.info("✅ Enfocare Service Application Started Successfully! TOGE");
+	}
 
 }
