@@ -28,12 +28,12 @@ public class ProfileService {
 	private ProfileMapper profileMapper;
 
 	public Profile getProfileByEmail(String email) {
-		ProfileEntity profileEntity = profileRepository.findByEmail(email);
+		ProfileEntity profileEntity = profileRepository.findByEmail(email).orElse(null);
 		return profileEntity != null ? profileMapper.map(profileEntity) : null;
 	}
 
 	public Profile getProfileByMedicalField(String medicalField) {
-		ProfileEntity profileEntity = profileRepository.findByMedicalField(medicalField);
+		ProfileEntity profileEntity = profileRepository.findByMedicalField(medicalField).orElse(null);
 		return profileEntity != null ? profileMapper.map(profileEntity) : null;
 	}
 
@@ -104,7 +104,7 @@ public class ProfileService {
 
 	public Profile updateProfile(String email, Profile updatedProfile) {
 		System.err.println("COCK");
-		ProfileEntity existingProfileEntity = profileRepository.findByEmail(email);
+		ProfileEntity existingProfileEntity = profileRepository.findByEmail(email).orElse(null);
 
 		if (existingProfileEntity != null) {
 			// Update fields with non-null values from the updated profile

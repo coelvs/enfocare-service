@@ -22,6 +22,8 @@ public class Profile {
 	private String profileSetup;
 	private String bloodType;
 	private String avatarDirectory;
+	private String licenseNumber;
+	private Boolean isApproved;
 
 	public String getAvatarDirectory() {
 		return avatarDirectory;
@@ -165,6 +167,22 @@ public class Profile {
 
 	public void setProfileSetup(String profileSetup) {
 		this.profileSetup = profileSetup;
+	}
+
+	public String getLicenseNumber() {
+		return licenseNumber;
+	}
+
+	public void setLicenseNumber(String licenseNumber) {
+		this.licenseNumber = licenseNumber;
+	}
+
+	public Boolean getIsApproved() {
+		return isApproved;
+	}
+
+	public void setIsApproved(Boolean isApproved) {
+		this.isApproved = isApproved;
 	}
 
 }

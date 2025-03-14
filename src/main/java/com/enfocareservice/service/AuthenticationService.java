@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.enfocareservice.entity.ProfileEntity;
 import com.enfocareservice.entity.TokenEntity;
 import com.enfocareservice.entity.UserEntity;
 import com.enfocareservice.model.AuthenticationRequest;
@@ -14,6 +15,7 @@ import com.enfocareservice.model.AuthenticationResponse;
 import com.enfocareservice.model.RegisterRequest;
 import com.enfocareservice.model.Role;
 import com.enfocareservice.model.TokenType;
+import com.enfocareservice.repository.ProfileRepository;
 import com.enfocareservice.repository.TokenRepository;
 import com.enfocareservice.repository.UserRepository;
 import com.fasterxml.jackson.core.exc.StreamWriteException;
@@ -26,6 +28,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class AuthenticationService {
+
+	@Autowired
+	private ProfileRepository profileRepository;
 
 	@Autowired
 	private TokenRepository tokenRepository;
@@ -67,24 +72,29 @@ public class AuthenticationService {
 	}
 
 	public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-
 		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(),
 				authenticationRequest.getPassword()));
 
 		UserEntity userEntity = userRepository.findByEmail(authenticationRequest.getEmail()).orElseThrow();
 
+		// ✅ Prevent unqualified doctors from logging in
+		if (userEntity.getRole() == Role.DOCTOR) {
+			ProfileEntity profile = profileRepository.findByEmail(userEntity.getEmail())
+					.orElseThrow(() -> new RuntimeException("Profile not found"));
+
+			if (!profile.getApproved()) {
+				throw new RuntimeException("Your account is pending approval. Please wait for admin verification.");
+			}
+		}
+
 		userStatusService.setUserOnline(userEntity.getEmail());
 
 		revokeAllUserTokens(userEntity);
-
 		String jwtToken = jwtService.generateToken(userEntity);
-
 		String refreshToken = jwtService.generateRefreshToken(userEntity);
-
 		saveUserToken(userEntity, jwtToken);
 
 		AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
 		authenticationResponse.setToken(jwtToken);
 		authenticationResponse.setEmail(jwtService.extractUsername(jwtToken));
 		authenticationResponse.setExpiration(jwtService.extractExpiration(jwtToken));

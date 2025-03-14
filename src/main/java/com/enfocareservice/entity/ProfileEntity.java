@@ -69,6 +69,15 @@ public class ProfileEntity {
 	@Column(name = "avatar_directory")
 	private String avatarDirectory;
 
+	@Column(name = "license_number")
+	private String licenseNumber;
+
+	@Column(name = "is_approved")
+	private Boolean isApproved = false;
+
+	@Column(name = "approval_date")
+	private Date approvalDate;
+
 	public String getAvatarDirectory() {
 		return avatarDirectory;
 	}
@@ -211,6 +220,30 @@ public class ProfileEntity {
 
 	public void setBloodType(String bloodType) {
 		this.bloodType = bloodType;
+	}
+
+	public String getLicenseNumber() {
+		return licenseNumber;
+	}
+
+	public void setLicenseNumber(String licenseNumber) {
+		this.licenseNumber = licenseNumber;
+	}
+
+	public Boolean getApproved() {
+		return isApproved;
+	}
+
+	public void setApproved(Boolean isApproved) {
+		this.isApproved = isApproved;
+	}
+
+	public Date getApprovalDate() {
+		return approvalDate;
+	}
+
+	public void setApprovalDate(Date approvalDate) {
+		this.approvalDate = approvalDate;
 	}
 
 }
