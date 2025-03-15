@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Doctor Approvals</title>
+</head>
+<body>
+    <div>
+        <h2>Pending Doctor Approvals</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>License Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="doctorList">
+                <!-- Doctors will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const apiBaseUrl = '/api/admin/doctors';  // Change this to match your API path
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch(apiBaseUrl);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch doctors.");
+                }
+                const doctors = await response.json();
+
+                const tableBody = document.getElementById('doctorList');
+                tableBody.innerHTML = ''; // Clear table
+
+                if (doctors.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4">No pending doctors</td></tr>';
+                }
+
+                doctors.forEach(doctor => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${doctor.firstname} ${doctor.lastname}</td>
+                        <td>${doctor.email}</td>
+                        <td>${doctor.licenseNumber}</td>
+                        <td>
+                            <button onclick="approveDoctor('${doctor.email}')">Approve</button>
+                            <button onclick="rejectDoctor('${doctor.email}')">Reject</button>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error loading doctors:", error);
+            }
+        }
+
+        async function approveDoctor(email) {
+            try {
+                const response = await fetch(`${apiBaseUrl}/approve`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }) 
+                });
+                if (!response.ok) {
+                    throw new Error("Approval failed.");
+                }
+                loadDoctors();
+            } catch (error) {
+                console.error("Error approving doctor:", error);
+            }
+        }
+
+        async function rejectDoctor(email) {
+            try {
+                const response = await fetch(`${apiBaseUrl}/reject`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }) 
+                });
+                if (!response.ok) {
+                    throw new Error("Rejection failed.");
+                }
+                loadDoctors();
+            } catch (error) {
+                console.error("Error rejecting doctor:", error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDoctors);
+    </script>
+</body>
+</html>
