@@ -30,15 +30,15 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").authenticated() // Admin panel requires
-																									// authentication
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Allow CSRF for form login
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").hasRole("ADMIN")
 						.requestMatchers("/actuator/**", "/extensions/**").permitAll()
 						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
 						.authenticated())
 				.formLogin(login -> login.defaultSuccessUrl("/admin", true).permitAll())
 				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout").permitAll())
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
 				.authenticationManager(authenticationManager())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
