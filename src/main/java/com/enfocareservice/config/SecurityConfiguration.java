@@ -31,7 +31,7 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable().authorizeHttpRequests()
-				.requestMatchers("/admin/**", "/actuator/**", "/extensions/**").permitAll()
+				.requestMatchers("/admin/**", "/actuator/**", "/admin/extensions/**").permitAll()
 				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest().authenticated()
 				.and().sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationManager(authenticationManager())
