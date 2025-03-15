@@ -30,8 +30,9 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable().authorizeHttpRequests()
-				.requestMatchers("/admin/**", "/actuator/**", "/extensions/**").permitAll()
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
+				.headers(headers -> headers.frameOptions().sameOrigin()) // ✅ Allow iframes from the same origin
+				.authorizeHttpRequests().requestMatchers("/admin/**", "/actuator/**", "/extensions/**").permitAll()
 				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest().authenticated()
 				.and().sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationManager(authenticationManager())
