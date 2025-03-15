@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,13 +22,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-	@Autowired
-	private TokenRepository tokenRepository;
 
+	private final TokenRepository tokenRepository;
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
 
@@ -44,10 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
-//
-//		jwt = authHeader.substring(7);
-//		userEmail = jwtService.extractUsername(jwt);
-//		
+
 		jwt = authHeader.substring(7);
 		logger.info("Received JWT: {}", jwt); // Log the received JWT
 
