@@ -31,13 +31,17 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfiguration {
 
 	@Autowired
-	private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-	@Autowired
-	private AuthenticationProvider authenticationProvider;
-
-	@Autowired
 	private LogoutHandler logoutHandler;
+
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final AuthenticationProvider authenticationProvider;
+
+	// ✅ Explicit Constructor Injection
+	public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
+			AuthenticationProvider authenticationProvider) {
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+		this.authenticationProvider = authenticationProvider;
+	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
