@@ -42,6 +42,7 @@ public class SecurityConfiguration {
 				.formLogin(login -> login.loginPage("/admin/login").defaultSuccessUrl("/admin", true).permitAll())
 				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout").permitAll())
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.authenticationManager(authenticationManager())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
@@ -61,8 +62,8 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		return config.getAuthenticationManager();
+	public AuthenticationManager authenticationManager() throws Exception {
+		return new AuthenticationConfiguration().getAuthenticationManager();
 	}
 
 	@Bean
