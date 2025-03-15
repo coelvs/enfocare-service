@@ -31,10 +31,7 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").hasRole("ADMIN") // ✅ Protect admin
-																									// panel
-						.requestMatchers("/actuator/**", "/extensions/**").permitAll() // ✅ Allow Spring Boot Admin &
-																						// Actuator
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/**", "/extensions/**").permitAll()
 						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
 						.authenticated())
 				.formLogin().disable() // Disable form login
