@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,15 +25,16 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-	@Autowired
-	private JwtService jwtService;
+	private final JwtService jwtService;
+	private final UserDetailsService userDetailsService;
+	private final TokenRepository tokenRepository;
 
-	@Lazy // ✅ Prevent circular dependency
-	@Autowired
-	private UserDetailsService userDetailsService;
-
-	@Autowired
-	private TokenRepository tokenRepository;
+	public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService,
+			TokenRepository tokenRepository) {
+		this.jwtService = jwtService;
+		this.userDetailsService = userDetailsService;
+		this.tokenRepository = tokenRepository;
+	}
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
