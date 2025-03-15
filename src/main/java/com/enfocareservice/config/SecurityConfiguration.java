@@ -10,6 +10,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -36,11 +42,18 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable().authorizeHttpRequests()
-				.requestMatchers("/admin/**", "/actuator/**", "/external/extensions/**").permitAll()
-				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest().authenticated()
-				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Move this inside ✅
-				.and().authenticationProvider(authenticationProvider)
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").authenticated() // Enforce login for
+																									// admin
+						.requestMatchers("/actuator/**", "/extensions/**").permitAll()
+						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
+						.authenticated())
+				.formLogin(login -> login.loginPage("/admin/login") // Admin login page
+						.defaultSuccessUrl("/admin", true) // Redirect after login
+						.permitAll())
+				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout").permitAll())
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.authenticationProvider(authenticationProvider)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout.logoutUrl("/api/v1/auth/logout").addLogoutHandler(logoutHandler)
 						.logoutSuccessHandler(
@@ -62,4 +75,17 @@ public class SecurityConfiguration {
 		return source;
 	}
 
+	@Bean
+	public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+		UserDetails admin = User.builder().username("admin").password(passwordEncoder.encode("admin123")) // Encrypt
+																											// password
+				.roles("ADMIN").build();
+
+		return new InMemoryUserDetailsManager(admin);
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder(); // Use BCrypt for hashing passwords
+	}
 }
