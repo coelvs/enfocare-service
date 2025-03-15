@@ -1,7 +1,5 @@
 package com.enfocareservice.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -38,7 +36,7 @@ public class SecurityConfiguration {
 						.requestMatchers("/actuator/**", "/extensions/**").permitAll()
 						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
 						.authenticated())
-				.formLogin(withDefaults()) // Uses default Spring Boot Admin login page
+				.formLogin(login -> login.defaultSuccessUrl("/admin", true).permitAll())
 				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout").permitAll())
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.authenticationManager(authenticationManager())
