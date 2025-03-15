@@ -39,7 +39,7 @@ public class SecurityConfiguration {
 																						// Actuator
 						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
 						.authenticated())
-				.formLogin(login -> login.defaultSuccessUrl("/admin", true).permitAll())
+				.formLogin(login -> login.defaultSuccessUrl("/admin/", true).permitAll())
 				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout")
 						.invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll() // ✅ Ensure logout is
 																								// allowed for everyone
