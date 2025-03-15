@@ -4,11 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pending Doctor Approvals</title>
+    
+    <style>
+        /* Center content */
+        .container {
+            width: 80%;
+            margin: 30px auto;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        /* Style the table */
+        .doctor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #fff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table headers */
+        .doctor-table th {
+            background: #007bff;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        /* Table rows */
+        .doctor-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        /* Alternate row colors */
+        .doctor-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        /* Buttons */
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        /* Approve Button */
+        .approve-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        /* Reject Button */
+        .reject-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Hover Effects */
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
-    <div>
+
+    <div class="container">
         <h2>Pending Doctor Approvals</h2>
-        <table border="1">
+        <table class="doctor-table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -24,76 +91,52 @@
     </div>
 
     <script>
-        const apiBaseUrl = '/api/admin/doctors';  // Change this to match your API path
+        const apiBaseUrl = '/api/admin/doctors';
 
         async function loadDoctors() {
-            try {
-                const response = await fetch(apiBaseUrl);
-                if (!response.ok) {
-                    throw new Error("Failed to fetch doctors.");
-                }
-                const doctors = await response.json();
+            const response = await fetch(apiBaseUrl);
+            const doctors = await response.json();
 
-                const tableBody = document.getElementById('doctorList');
-                tableBody.innerHTML = ''; // Clear table
+            const tableBody = document.getElementById('doctorList');
+            tableBody.innerHTML = ''; // Clear table
 
-                if (doctors.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="4">No pending doctors</td></tr>';
-                }
+            doctors.forEach(doctor => {
+                const row = document.createElement('tr');
 
-                doctors.forEach(doctor => {
-                    const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${doctor.firstname} ${doctor.lastname}</td>
+                    <td>${doctor.email}</td>
+                    <td>${doctor.licenseNumber}</td>
+                    <td>
+                        <button class="approve-btn" onclick="approveDoctor('${doctor.email}')">Approve</button>
+                        <button class="reject-btn" onclick="rejectDoctor('${doctor.email}')">Reject</button>
+                    </td>
+                `;
 
-                    row.innerHTML = `
-                        <td>${doctor.firstname} ${doctor.lastname}</td>
-                        <td>${doctor.email}</td>
-                        <td>${doctor.licenseNumber}</td>
-                        <td>
-                            <button onclick="approveDoctor('${doctor.email}')">Approve</button>
-                            <button onclick="rejectDoctor('${doctor.email}')">Reject</button>
-                        </td>
-                    `;
-
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error("Error loading doctors:", error);
-            }
+                tableBody.appendChild(row);
+            });
         }
 
         async function approveDoctor(email) {
-            try {
-                const response = await fetch(`${apiBaseUrl}/approve`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }) 
-                });
-                if (!response.ok) {
-                    throw new Error("Approval failed.");
-                }
-                loadDoctors();
-            } catch (error) {
-                console.error("Error approving doctor:", error);
-            }
+            await fetch(`${apiBaseUrl}/approve`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }) 
+            });
+            loadDoctors();
         }
 
         async function rejectDoctor(email) {
-            try {
-                const response = await fetch(`${apiBaseUrl}/reject`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }) 
-                });
-                if (!response.ok) {
-                    throw new Error("Rejection failed.");
-                }
-                loadDoctors();
-            } catch (error) {
-                console.error("Error rejecting doctor:", error);
-            }
+            await fetch(`${apiBaseUrl}/reject`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }) 
+            });
+            loadDoctors();
         }
 
         document.addEventListener('DOMContentLoaded', loadDoctors);
     </script>
+
 </body>
 </html>
