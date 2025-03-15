@@ -81,6 +81,7 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>License Number</th>
+                    <th>Date of Birth</th> <!-- ✅ Updated Label -->
                     <th>Action</th>
                 </tr>
             </thead>
@@ -91,51 +92,79 @@
     </div>
 
     <script>
-        const apiBaseUrl = '/api/admin/doctors';
+        const apiBaseUrl = "https://enfocare-service-production.up.railway.app/admin";
 
         async function loadDoctors() {
-            const response = await fetch(apiBaseUrl);
-            const doctors = await response.json();
+            try {
+                const response = await fetch(`${apiBaseUrl}/pending-doctors`);
+                const doctors = await response.json();
 
-            const tableBody = document.getElementById('doctorList');
-            tableBody.innerHTML = ''; // Clear table
+                const tableBody = document.getElementById('doctorList');
+                tableBody.innerHTML = ''; // Clear table
 
-            doctors.forEach(doctor => {
-                const row = document.createElement('tr');
+                doctors.forEach(doctor => {
+                    const formattedDOB = doctor.birthday ? new Date(doctor.birthday).toLocaleDateString() : "N/A";
 
-                row.innerHTML = `
-                    <td>${doctor.firstname} ${doctor.lastname}</td>
-                    <td>${doctor.email}</td>
-                    <td>${doctor.licenseNumber}</td>
-                    <td>
-                        <button class="approve-btn" onclick="approveDoctor('${doctor.email}')">Approve</button>
-                        <button class="reject-btn" onclick="rejectDoctor('${doctor.email}')">Reject</button>
-                    </td>
-                `;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${doctor.firstname} ${doctor.lastname}</td>
+                        <td>${doctor.email}</td>
+                        <td>${doctor.licenseNumber || "Not Assigned"}</td>
+                        <td>${formattedDOB}</td> <!-- ✅ Shows formatted Date of Birth -->
+                        <td>
+                            <button class="approve-btn" onclick="approveDoctor('${doctor.email}')">Approve</button>
+                            <button class="reject-btn" onclick="rejectDoctor('${doctor.email}')">Reject</button>
+                        </td>
+                    `;
 
-                tableBody.appendChild(row);
-            });
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error loading doctors:", error);
+            }
         }
 
         async function approveDoctor(email) {
-            await fetch(`${apiBaseUrl}/approve`, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }) 
-            });
-            loadDoctors();
+            let licenseNumber = prompt(`Enter License Number for ${email}:`);
+            if (!licenseNumber) {
+                alert("Approval cancelled.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/approve-doctor/${email}?licenseNumber=${licenseNumber}`, { 
+                    method: "PUT"
+                });
+
+                const result = await response.text();
+                alert(result);
+                loadDoctors(); // Reload the list after approval
+            } catch (error) {
+                console.error("Error approving doctor:", error);
+                alert("Failed to approve doctor.");
+            }
         }
 
         async function rejectDoctor(email) {
-            await fetch(`${apiBaseUrl}/reject`, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }) 
-            });
-            loadDoctors();
+            if (!confirm(`Are you sure you want to reject ${email}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/reject-doctor/${email}`, { 
+                    method: "PUT"
+                });
+
+                const result = await response.text();
+                alert(result);
+                loadDoctors(); // Reload the list after rejection
+            } catch (error) {
+                console.error("Error rejecting doctor:", error);
+                alert("Failed to reject doctor.");
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', loadDoctors);
+        document.addEventListener("DOMContentLoaded", loadDoctors);
     </script>
 
 </body>
