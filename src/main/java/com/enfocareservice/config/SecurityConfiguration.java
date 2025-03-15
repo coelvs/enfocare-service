@@ -30,13 +30,10 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/**", "/extensions/**").permitAll()
-						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
-						.authenticated())
-				.formLogin().disable() // Disable form login
-				.logout().disable() // Disable logout
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable().authorizeHttpRequests()
+				.requestMatchers("/admin/**", "/actuator/**", "/extensions/**").permitAll()
+				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest().authenticated()
+				.and().sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationManager(authenticationManager())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
