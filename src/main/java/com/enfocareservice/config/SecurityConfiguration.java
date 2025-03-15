@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-//import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,11 +31,11 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfiguration {
 
 	private final LogoutHandler logoutHandler;
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final AuthenticationProvider authenticationProvider;
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http,
+			@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
 
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").authenticated() // Enforce login for
