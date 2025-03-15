@@ -31,14 +31,19 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Allow CSRF for form login
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").hasRole("ADMIN")
-						.requestMatchers("/actuator/**", "/extensions/**").permitAll()
+				.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**")) // ✅ Allow CSRF for form login &
+																						// actuators
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").hasRole("ADMIN") // ✅ Protect admin
+																									// panel
+						.requestMatchers("/actuator/**", "/extensions/**").permitAll() // ✅ Allow Spring Boot Admin &
+																						// Actuator
 						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
 						.authenticated())
 				.formLogin(login -> login.defaultSuccessUrl("/admin", true).permitAll())
-				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout").permitAll())
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
+				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout")
+						.invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll() // ✅ Ensure logout is
+																								// allowed for everyone
+				).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 				.authenticationManager(authenticationManager())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
