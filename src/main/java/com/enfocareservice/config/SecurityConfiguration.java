@@ -36,13 +36,6 @@ public class SecurityConfiguration {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final AuthenticationProvider authenticationProvider;
 
-	// ✅ Explicit Constructor Injection
-	public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
-			AuthenticationProvider authenticationProvider) {
-		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-		this.authenticationProvider = authenticationProvider;
-	}
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
