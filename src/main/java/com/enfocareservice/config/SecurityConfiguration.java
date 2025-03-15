@@ -37,11 +37,9 @@ public class SecurityConfiguration {
 																						// Actuator
 						.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**").permitAll().anyRequest()
 						.authenticated())
-				.formLogin(login -> login.permitAll())
-				.logout(logout -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout")
-						.invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll() // ✅ Ensure logout is
-																								// allowed for everyone
-				).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.formLogin().disable() // Disable form login
+				.logout().disable() // Disable logout
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationManager(authenticationManager())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
