@@ -1,6 +1,5 @@
 package com.enfocareservice.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,11 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class ApplicationConfig {
 
-	@Autowired
-	private UserDetailsService userDetailsService; // Autowired userDetailsService
+	private final UserDetailsService userDetailsService;
+	private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder; // Autowired PasswordEncoder
+	// ✅ Constructor Injection (Best Practice)
+	public ApplicationConfig(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+		this.userDetailsService = userDetailsService;
+		this.passwordEncoder = passwordEncoder;
+	}
 
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
