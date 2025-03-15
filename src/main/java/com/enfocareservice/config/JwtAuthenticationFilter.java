@@ -23,16 +23,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 	@Autowired
 	private TokenRepository tokenRepository;
 
-	@Autowired
-	private JwtService jwtService;
-
+	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
 
 	@Override
