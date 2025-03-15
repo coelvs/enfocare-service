@@ -20,9 +20,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfiguration {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final AuthenticationConfiguration authenticationConfiguration;
 
-	public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter) {
+	public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
+			AuthenticationConfiguration authenticationConfiguration) {
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+		this.authenticationConfiguration = authenticationConfiguration;
 	}
 
 	@Bean
@@ -44,7 +47,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	public AuthenticationManager authenticationManager() throws Exception {
-		return new AuthenticationConfiguration().getAuthenticationManager();
+		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 	@Bean
