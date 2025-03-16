@@ -90,7 +90,7 @@ public class AdminController {
 			// 5. Delete from user table
 			userRepository.delete(user);
 
-			return ResponseEntity.ok("Doctor and all related data rejected and deleted.");
+			return ResponseEntity.ok("Doctor has been successfully rejected.");
 		}
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
