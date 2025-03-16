@@ -15,7 +15,7 @@ public interface UserStatusRepository extends JpaRepository<UserStatusEntity, Lo
 
 	@Modifying
 	@Transactional
-	@Query("DELETE FROM UserStatusEntity us WHERE us.userId = :userId")
-	void deleteByUserId(Long userId);
+	@Query("DELETE FROM UserStatusEntity us WHERE us.email = :email")
+	void deleteByEmail(String email);
 
 }

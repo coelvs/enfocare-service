@@ -82,7 +82,7 @@ public class AdminController {
 			voximplantAccountRepository.deleteByUser(email);
 
 			// 3. Delete from user_status table
-			userStatusRepository.deleteByUserId(userId);
+			userStatusRepository.deleteByEmail(email);
 
 			// 4. Delete from profile table
 			profileRepository.deleteByEmail(email);
