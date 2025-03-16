@@ -37,9 +37,9 @@ public class SecurityConfiguration {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf().disable()
 				.headers(headers -> headers.frameOptions().sameOrigin()) // ✅ Allow iframes from the same origin
 				.authorizeHttpRequests().requestMatchers("/admin/**", "/actuator/**", "/extensions/**").permitAll()
-				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**", "/profile/save", "/user/profiles")
-				.permitAll().requestMatchers("/enfocare/medical-file/**", "/user/profiles").permitAll().anyRequest()
-				.authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**", "/enfocare/profile/**").permitAll()
+				.requestMatchers("/enfocare/medical-file/**").permitAll().anyRequest().authenticated().and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.authenticationProvider(authenticationProvider)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout.logoutUrl("/api/v1/auth/logout").addLogoutHandler(logoutHandler)
