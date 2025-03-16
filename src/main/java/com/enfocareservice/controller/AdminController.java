@@ -17,7 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.enfocareservice.dto.DoctorDTO;
 import com.enfocareservice.entity.ProfileEntity;
+import com.enfocareservice.entity.UserEntity;
 import com.enfocareservice.repository.ProfileRepository;
+import com.enfocareservice.repository.TokenRepository;
+import com.enfocareservice.repository.UserRepository;
+import com.enfocareservice.repository.UserStatusRepository;
+import com.enfocareservice.repository.VoximplantAccountRepository;
 
 @RestController
 @RequestMapping("/admin")
@@ -25,6 +30,18 @@ public class AdminController {
 
 	@Autowired
 	private ProfileRepository profileRepository;
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private TokenRepository tokenRepository;
+
+	@Autowired
+	private VoximplantAccountRepository voximplantAccountRepository;
+
+	@Autowired
+	private UserStatusRepository userStatusRepository;
 
 	@PutMapping("/approve-doctor/{email}")
 	public ResponseEntity<String> approveDoctor(@PathVariable String email,
@@ -52,11 +69,30 @@ public class AdminController {
 	@PutMapping("/reject-doctor/{email}")
 	public ResponseEntity<String> rejectDoctor(@PathVariable String email) {
 		Optional<ProfileEntity> doctorOpt = profileRepository.findByEmail(email);
+		Optional<UserEntity> userOpt = userRepository.findByEmail(email);
 
-		if (doctorOpt.isPresent()) {
-			profileRepository.delete(doctorOpt.get());
-			return ResponseEntity.ok("Doctor registration rejected.");
+		if (doctorOpt.isPresent() && userOpt.isPresent()) {
+			UserEntity user = userOpt.get();
+			Long userId = user.getId();
+
+			// 1. Delete from token table
+			tokenRepository.deleteByUserId(userId);
+
+			// 2. Delete from voximplant_account table
+			voximplantAccountRepository.deleteByUser(email);
+
+			// 3. Delete from user_status table
+			userStatusRepository.deleteByUserId(userId);
+
+			// 4. Delete from profile table
+			profileRepository.deleteByEmail(email);
+
+			// 5. Delete from user table
+			userRepository.delete(user);
+
+			return ResponseEntity.ok("Doctor and all related data rejected and deleted.");
 		}
+
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
 	}
 
