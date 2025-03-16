@@ -177,11 +177,11 @@ public class Profile {
 		this.licenseNumber = licenseNumber;
 	}
 
-	public Boolean getIsApproved() {
+	public Boolean getApproved() {
 		return isApproved;
 	}
 
-	public void setIsApproved(Boolean isApproved) {
+	public void setApproved(Boolean isApproved) {
 		this.isApproved = isApproved;
 	}
 

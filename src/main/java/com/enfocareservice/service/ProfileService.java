@@ -57,6 +57,9 @@ public class ProfileService {
 		profileEntity.setProfileSetup(profile.getProfileSetup());
 		profileEntity.setWeight(profile.getWeight());
 		profileEntity.setBloodType(profile.getBloodType());
+		profileEntity.setLicenseNumber(profile.getLicenseNumber());
+
+		System.out.println("Saving License Number: " + profile.getLicenseNumber()); // Debug print
 
 		Profile result = profileMapper.map(profileRepository.save(profileEntity));
 

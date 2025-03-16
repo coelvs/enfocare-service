@@ -88,15 +88,20 @@ public class ProfileController {
 
 	@PostMapping("/save")
 	public ResponseEntity<Profile> saveProfile(@RequestBody Profile profile) {
-
 		System.err.println("profile called" + profile);
+
 		try {
-			// Your ProfileService should have a method to save a profile
+			// If profile indicates doctor, set isApproved to false
+			if (Boolean.TRUE.equals(profile.getIsDoctor())) {
+				profile.setApproved(false); // Pending approval
+				System.err.println("Doctor profile detected. Setting isApproved=false");
+			}
+
 			Profile savedProfile = profileService.createProfile(profile);
 			return ResponseEntity.ok(savedProfile);
-		} catch (Exception e) {
-			// Handle exceptions, e.g., log the error
 
+		} catch (Exception e) {
+			System.err.println("Error saving profile: " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}

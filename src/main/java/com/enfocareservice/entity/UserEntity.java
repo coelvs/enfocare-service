@@ -3,7 +3,6 @@ package com.enfocareservice.entity;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +20,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user")
-public class UserEntity implements UserDetails, CredentialsContainer {
+public class UserEntity implements UserDetails {
 
 	private static final long serialVersionUID = 1L; // ✅ Added serialVersionUID
 
@@ -109,9 +108,8 @@ public class UserEntity implements UserDetails, CredentialsContainer {
 		return true;
 	}
 
-	@Override
-	public void eraseCredentials() {
-		this.password = null; // ✅ Clears credentials from memory
-	}
+	// @Override
+	// public void eraseCredentials() {this.password = null; } // ✅ Clears
+	// credentials from memory
 
 }
