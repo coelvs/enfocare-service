@@ -72,36 +72,28 @@
     </div>
 
     <script>
-       async function fetchTransactions() {
-    try {
-        let response = await fetch('/api/transactions');
-        let transactions = await response.json();
+  fetch('/api/transactions')
+    .then(response => response.json())
+    .then(data => {
+        let tableBody = document.getElementById('transactions-table');
+        tableBody.innerHTML = '';
 
-        let tableBody = document.getElementById('transactions-table-body');
-        tableBody.innerHTML = ''; // Clear existing rows
-
-        transactions.forEach(tx => {
-            let row = `
-                <tr>
-                    <td>${tx.orderId}</td>
-                    <td>${tx.email}</td>
-                    <td>${tx.currency} ${tx.amount.toFixed(2)}</td>
-                    <td>${new Date(tx.paymentDate).toLocaleString()}</td>
-                    <td>${tx.paymentMethod}</td>
-                    <td>${tx.subscriptionType}</td>
-                    <td><a href="${tx.receiptUrl}" class="receipt-link" target="_blank">View Receipt</a></td>
-                </tr>
-            `;
+        data.forEach(txn => {
+            let row = `<tr>
+                <td>${txn.orderId}</td>
+                <td>${txn.email}</td>
+                <td>${txn.amount}</td>
+                <td>${txn.paymentDate}</td>
+                <td>${txn.paymentMethod}</td>
+                <td>${txn.subscriptionType}</td>
+                <td><a href="${txn.receiptUrl}">Receipt</a></td>
+            </tr>`;
             tableBody.innerHTML += row;
         });
-    } catch (error) {
-        console.error("Error fetching transactions:", error);
-    }
-}
+    })
+    .catch(error => console.error("Failed to load transactions:", error));
+</script>
 
-document.addEventListener("DOMContentLoaded", fetchTransactions);
-
-    </script>
 
 </body>
 </html>
