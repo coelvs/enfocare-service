@@ -18,7 +18,9 @@ public class TransactionService {
 
 	// ✅ Retrieve all transactions
 	public List<Transaction> getAllTransactions() {
-		return transactionRepository.findAll(); // ✅ Fetch all transactions from the DB
+		List<Transaction> transactions = transactionRepository.findAll();
+		System.out.println("Fetched Transactions: " + transactions.size());
+		return transactions;
 	}
 
 	// ✅ Save a transaction (Missing method - ADD THIS!)

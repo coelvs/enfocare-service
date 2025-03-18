@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions History</title> <!-- ✅ Corrected title here -->
+    <title>Transaction History</title>
     
     <style>
         .container {
@@ -72,32 +72,35 @@
     </div>
 
     <script>
-        async function fetchTransactions() {
-            try {
-                let response = await fetch('/api/transactions');
-                let transactions = await response.json();
+       async function fetchTransactions() {
+    try {
+        let response = await fetch('/api/transactions');
+        let transactions = await response.json();
 
-                let tableBody = document.getElementById('transactions-table-body');
-                tableBody.innerHTML = '';
+        let tableBody = document.getElementById('transactions-table-body');
+        tableBody.innerHTML = ''; // Clear existing rows
 
-                transactions.forEach(tx => {
-                    let row = <tr>
-                        <td>${tx.orderId}</td>
-                        <td>${tx.email}</td>
-                        <td>${tx.currency} ${tx.amount.toFixed(2)}</td>
-                        <td>${new Date(tx.paymentDate).toLocaleString()}</td>
-                        <td>${tx.paymentMethod}</td>
-                        <td>${tx.subscriptionType}</td>
-                        <td><a href="${tx.receiptUrl}" class="receipt-link" target="_blank">View Receipt</a></td>
-                    </tr>;
-                    tableBody.innerHTML += row;
-                });
-            } catch (error) {
-                console.error("Error fetching transactions:", error);
-            }
-        }
+        transactions.forEach(tx => {
+            let row = `
+                <tr>
+                    <td>${tx.orderId}</td>
+                    <td>${tx.email}</td>
+                    <td>${tx.currency} ${tx.amount.toFixed(2)}</td>
+                    <td>${new Date(tx.paymentDate).toLocaleString()}</td>
+                    <td>${tx.paymentMethod}</td>
+                    <td>${tx.subscriptionType}</td>
+                    <td><a href="${tx.receiptUrl}" class="receipt-link" target="_blank">View Receipt</a></td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+    }
+}
 
-        document.addEventListener("DOMContentLoaded", fetchTransactions);
+document.addEventListener("DOMContentLoaded", fetchTransactions);
+
     </script>
 
 </body>

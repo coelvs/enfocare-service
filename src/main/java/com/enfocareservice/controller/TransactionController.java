@@ -40,8 +40,10 @@ public class TransactionController {
 
 	// ✅ Convert Entity to DTO for clean API responses
 	private TransactionDTO convertToDTO(Transaction transaction) {
+		System.out.println("Mapping transaction: " + transaction);
 		return new TransactionDTO(transaction.getOrderId(), transaction.getEmail(), transaction.getAmount(),
 				transaction.getCurrency(), transaction.getPaymentDate(), transaction.getPaymentMethod(),
 				transaction.getSubscriptionType(), transaction.getReceiptUrl());
 	}
+
 }
