@@ -38,8 +38,9 @@ public class SecurityConfiguration {
 				.headers(headers -> headers.frameOptions().sameOrigin()) // ✅ Allow iframes from the same origin
 				.authorizeHttpRequests().requestMatchers("/admin/**", "/actuator/**", "/extensions/**").permitAll()
 				.requestMatchers("/api/v1/auth/**", "/enfocare/chat/ws/**", "enfocare/profile/**").permitAll()
-				.requestMatchers("/enfocare/medical-file/**").permitAll().anyRequest().authenticated().and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.requestMatchers("/enfocare/medical-file/**", "/profile/save", "/voximplant/create", "/lobby/save")
+				.permitAll().anyRequest().authenticated().and().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.authenticationProvider(authenticationProvider)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout.logoutUrl("/api/v1/auth/logout").addLogoutHandler(logoutHandler)
