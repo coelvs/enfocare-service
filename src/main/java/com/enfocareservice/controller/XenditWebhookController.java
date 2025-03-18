@@ -3,6 +3,7 @@ package com.enfocareservice.controller;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping("/webhook/xendit")
 public class XenditWebhookController {
 
-	private static final String XENDIT_SECRET = "your-webhook-token"; // Replace with your actual Xendit webhook token
+	@Value("${xendit.webhook.token}") // ✅ Load token from properties file
+	private String xenditSecretToken;
 
 	@Autowired
 	private TransactionService transactionService;
@@ -31,8 +33,8 @@ public class XenditWebhookController {
 	public ResponseEntity<String> handleInvoicePaid(@RequestBody String payload,
 			@RequestHeader("x-callback-token") String token) {
 
-		// ✅ Step 1: Verify Xendit webhook token for security
-		if (!XENDIT_SECRET.equals(token)) {
+		// ✅ Step 1: Verify Xendit webhook token
+		if (!xenditSecretToken.equals(token)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
 		}
 
@@ -50,8 +52,10 @@ public class XenditWebhookController {
 			double amount = jsonNode.get("amount").asDouble();
 			Instant paymentDate = Instant.parse(jsonNode.get("paid_at").asText());
 			String receiptUrl = jsonNode.get("invoice_url").asText();
-			String currency = jsonNode.get("currency").asText();
 			String paymentMethod = jsonNode.get("payment_method").asText(); // Payment method
+
+			// ✅ Handle missing fields gracefully
+			String currency = jsonNode.has("currency") ? jsonNode.get("currency").asText() : "IDR";
 
 			// ✅ Step 3: Log transaction using TransactionService
 			transactionService.logTransaction(orderId, email, amount, currency, paymentDate, paymentMethod,

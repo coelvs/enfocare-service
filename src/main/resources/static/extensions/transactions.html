@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction History</title>
+    
     <style>
         .container {
             width: 80%;
@@ -80,7 +81,7 @@
                 tableBody.innerHTML = '';
 
                 transactions.forEach(tx => {
-                    let row = `<tr>
+                    let row = <tr>
                         <td>${tx.orderId}</td>
                         <td>${tx.email}</td>
                         <td>${tx.currency} ${tx.amount.toFixed(2)}</td>
@@ -88,7 +89,7 @@
                         <td>${tx.paymentMethod}</td>
                         <td>${tx.subscriptionType}</td>
                         <td><a href="${tx.receiptUrl}" class="receipt-link" target="_blank">View Receipt</a></td>
-                    </tr>`;
+                    </tr>;
                     tableBody.innerHTML += row;
                 });
             } catch (error) {
