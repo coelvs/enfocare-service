@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <style>
+        .container {
+            width: 80%;
+            margin: 30px auto;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #fff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .transactions-table th {
+            background: #007bff;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        .transactions-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .transactions-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .receipt-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .receipt-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Transactions</h2>
+        <table class="transactions-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Email</th>
+                    <th>Amount</th>
+                    <th>Payment Date</th>
+                    <th>Payment Method</th>
+                    <th>Subscription Type</th>
+                    <th>Receipt</th>
+                </tr>
+            </thead>
+            <tbody id="transactions-table-body">
+                <!-- Transactions will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchTransactions() {
+            try {
+                let response = await fetch('/api/transactions');
+                let transactions = await response.json();
+
+                let tableBody = document.getElementById('transactions-table-body');
+                tableBody.innerHTML = '';
+
+                transactions.forEach(tx => {
+                    let row = `<tr>
+                        <td>${tx.orderId}</td>
+                        <td>${tx.email}</td>
+                        <td>${tx.currency} ${tx.amount.toFixed(2)}</td>
+                        <td>${new Date(tx.paymentDate).toLocaleString()}</td>
+                        <td>${tx.paymentMethod}</td>
+                        <td>${tx.subscriptionType}</td>
+                        <td><a href="${tx.receiptUrl}" class="receipt-link" target="_blank">View Receipt</a></td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchTransactions);
+    </script>
+
+</body>
+</html>
