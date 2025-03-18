@@ -75,7 +75,8 @@ public class AuthenticationService {
 		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(),
 				authenticationRequest.getPassword()));
 
-		UserEntity userEntity = userRepository.findByEmail(authenticationRequest.getEmail()).orElseThrow();
+		UserEntity userEntity = userRepository.findByEmail(authenticationRequest.getEmail())
+				.orElseThrow(() -> new RuntimeException("User not found"));
 
 		// ✅ Prevent unqualified doctors from logging in
 		if (userEntity.getRole() == Role.DOCTOR) {
