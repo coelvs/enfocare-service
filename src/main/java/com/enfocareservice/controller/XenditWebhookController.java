@@ -46,22 +46,25 @@ public class XenditWebhookController {
 			// ✅ Step 2: Parse JSON payload
 			JsonNode jsonNode = objectMapper.readTree(payload);
 
-			if (!"PAID".equalsIgnoreCase(jsonNode.get("status").asText())) {
+			if (!"PAID".equalsIgnoreCase(jsonNode.path("status").asText())) {
 				return ResponseEntity.badRequest().body("Transaction is not paid");
 			}
 
-			String orderId = jsonNode.get("id").asText();
-			String email = jsonNode.get("payer_email").asText();
-			String subscriptionType = jsonNode.get("description").asText();
-			double amount = jsonNode.get("amount").asDouble();
-			Instant paymentDate = Instant.parse(jsonNode.get("paid_at").asText());
-			String receiptUrl = jsonNode.get("invoice_url").asText();
-			String paymentMethod = jsonNode.get("payment_method").asText(); // Payment method
+			// Use `.path("fieldName")` instead of `.get("fieldName")` to avoid
+			// NullPointerException
+			String orderId = jsonNode.path("id").asText(null);
+			String email = jsonNode.path("payer_email").asText(null);
+			String subscriptionType = jsonNode.path("description").asText(null);
+			double amount = jsonNode.path("amount").asDouble(0); // Default 0 if missing
+			Instant paymentDate = jsonNode.has("paid_at") ? Instant.parse(jsonNode.get("paid_at").asText())
+					: Instant.now();
+			String receiptUrl = jsonNode.has("invoice_url") ? jsonNode.get("invoice_url").asText() : null;
+			String paymentMethod = jsonNode.path("payment_method").asText(null);
 
 			// ✅ Handle missing fields gracefully
-			String currency = jsonNode.has("currency") ? jsonNode.get("currency").asText() : "IDR";
+			String currency = jsonNode.path("currency").asText("IDR");
 
-			// ✅ Step 3: Log transaction using TransactionService
+			// ✅ Step 3: Log transaction
 			transactionService.logTransaction(orderId, email, amount, currency, paymentDate, paymentMethod,
 					subscriptionType, receiptUrl);
 
@@ -70,5 +73,6 @@ public class XenditWebhookController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Error processing webhook: " + e.getMessage());
 		}
+
 	}
 }
