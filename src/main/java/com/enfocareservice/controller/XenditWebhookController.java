@@ -31,11 +31,15 @@ public class XenditWebhookController {
 
 	@PostMapping("/invoice-paid")
 	public ResponseEntity<String> handleInvoicePaid(@RequestBody String payload,
-			@RequestHeader("x-callback-token") String token) {
+			@RequestHeader(value = "x-callback-token", required = false) String token) {
 
-		// ✅ Step 1: Verify Xendit webhook token
-		if (!xenditSecretToken.equals(token)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		// 🔍 Debugging log (Optional: remove in production)
+		System.out.println("Received webhook request with token: " + token);
+
+		// ✅ Step 1: Verify Webhook Token
+		if (token == null || !token.equals(xenditSecretToken)) {
+			System.out.println("Invalid or missing Xendit token!");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid token");
 		}
 
 		try {
